@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="Luka Loncar" />
+    <title>INFO3 quiz - Luka Lončar</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="quiz">
+        <div class="sidebar">
+          <div class="question" id="question-1" onclick="prikaziSlide(0)">
+            1
+          </div>
+          <div class="question" id="question-2" onclick="prikaziSlide(1)">
+            2
+          </div>
+          <div class="question" id="question-3" onclick="prikaziSlide(2)">
+            3
+          </div>
+          <div class="question" id="question-4" onclick="prikaziSlide(3)">
+            4
+          </div>
+        </div>
+        <div class="main" id="main"></div>
+      </div>
+      <div id="results"></div>
+    </div>
+
+    <div class="alert">Odabran je maksimalan broj odgovora!</div>
+    <script src="app.js"></script>
+  </body>
+</html>
