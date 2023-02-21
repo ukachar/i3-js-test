@@ -1,58 +1,62 @@
-let currentSlide = 0;
-let checkAnswersButtonExists = 0;
 const alertBox = document.querySelector('.alert')
 const mainContainer = document.getElementById('main')
+const sidebarContainer = document.querySelector('.sidebar')
 
-const pitanja = [
-    { pitanje: "Koja je ekstenzija za JavaScript datoteke?", broj: 1 },
-    { pitanje: "Tko je napravio React?", broj: 2 },
-    { pitanje: "Za što je kratica 'MERN'?", broj: 3 },
-    { pitanje: "Koja je trenutna verzija EcmaScript-a?", broj: 4 }
-]
-let odgovori = {
-    "Question 1": [],
-    "Question 2": [],
-    "Question 3": [],
-    "Question 4": [],
-}
-
-const brojOdgovora = () => {
-    return (Math.floor(Math.random() * 7) + 2)
+const config = {
+    brojPitanja: 5,
+    odgovori: {},
+    sidebar: {
+        class: "question",
+        id(pitanje) {
+            return `question-${pitanje}`
+        },
+        onClick(pitanje) {
+            return `prikaziSlide(${pitanje})`
+        },
+        brojSlide(pitanje) {
+            return pitanje + 1
+        }
+    },
+    checkAnswersButtonExists: 0,
+    currentSlide: 0
 }
 
 const kreirajSlide = (pitanje) => {
-
     let odgovoriArr = [];
-
-    for (let i = 0; i < brojOdgovora(); i++) {
+    for (let i = 0; i < (config.brojPitanja + 5); i++) {
         odgovoriArr.push(i)
     }
 
     mainContainer.innerHTML += `
-    
-        <div id="slide${pitanje.broj}" class="slide inactive-slide" data-question='Question ${pitanje.broj}'>
-            <h1>${pitanje.pitanje}</h1>
-         <div class="odgovori-container" id="odgovori-container${pitanje.broj}"></div>
+        <div id="slide${pitanje}" class="slide inactive-slide" data-question='Question ${pitanje}'>
+            <h1>Pitanje ${pitanje}</h1>
+         <div class="odgovori-container" id="odgovori-container${pitanje}"></div>
         </div>
-        
         `
-    const odgovoriContainer = document.getElementById(`odgovori-container${pitanje.broj}`)
+    const odgovoriContainer = document.getElementById(`odgovori-container${pitanje}`)
     odgovoriArr.forEach(el => {
         odgovoriContainer.innerHTML += `
-        <input name='pitanje${pitanje.broj}' type="checkbox" id='s${pitanje.broj}c${odgovoriArr[el] + 1}' 
+        <input name='pitanje${pitanje}' type="checkbox" id='s${pitanje}c${odgovoriArr[el] + 1}' 
         class='check-button' value='${el + 1}'/>
-        <label for='s${pitanje.broj}c${odgovoriArr[el] + 1}'>${el + 1} </label>
-        
+        <label for='s${pitanje}c${odgovoriArr[el] + 1}'>${el + 1} </label>   
  `
     })
 
-    const slajd = document.getElementById(`slide${pitanje.broj}`)
+    const slajd = document.getElementById(`slide${pitanje}`)
     slajd.innerHTML += `
     <div class="nav-buttons">
         <button onclick="prosliSlide()" class="previous-slide-button">Previous slide</button>
         <button class="next-slide-button" onclick="sljedeciSlide()">Next slide</button>
     </div>`
 
+    //Kreiranje slajda na sidebar-u
+
+    const sidebarItem = document.createElement("div");
+    sidebarItem.classList.add(config.sidebar.class);
+    sidebarItem.setAttribute("id", config.sidebar.id(pitanje));
+    sidebarItem.setAttribute("onclick", `prikaziSlide(${pitanje - 1})`)
+    sidebarItem.innerText = (pitanje)
+    sidebarContainer.appendChild(sidebarItem)
 }
 
 const prikaziSlide = (slide) => {
@@ -66,14 +70,12 @@ const prikaziSlide = (slide) => {
     checkAnswersButton.innerHTML = `<button id="show-answers" disabled onclick="prikaziOdgovore()">Check Answers</button>`
 
 
-    if (checkAnswersButtonExists === 0) {
+    if (config.checkAnswersButtonExists === 0) {
         lastSlide.appendChild(checkAnswersButton)
-        checkAnswersButtonExists = 1
-    } else {
-        //ništa
+        config.checkAnswersButtonExists = 1
     }
 
-    currentSlide = slide;
+    config.currentSlide = slide;
 
     slides.forEach(el => {
         el.classList.remove('current-slide');
@@ -83,11 +85,10 @@ const prikaziSlide = (slide) => {
     })
 
 
-    if (currentSlide === 0) {
+    if (config.currentSlide === 0) {
         previousSlideButton.forEach(el => {
             el.style.display = 'none';
         });
-
 
     }
     else {
@@ -95,7 +96,7 @@ const prikaziSlide = (slide) => {
             el.style.display = 'inline-block';
         })
     }
-    if (currentSlide === 3) {
+    if (config.currentSlide === (config.brojPitanja - 1)) {
         nextSlideButton.forEach(el => {
             el.style.display = "none"
         });
@@ -113,24 +114,22 @@ const tester = (slide) => {
     const checkboxes = document.querySelectorAll(`input[type=checkbox][name=pitanje${slide}]`);
     const showAnswersButton = document.getElementById('show-answers')
     const slideDiv = document.querySelectorAll(".slide")
-    let lastChecked;
 
     checkboxes.forEach(el => {
         el.addEventListener('change', e => {
-            let brojCheckova = 0;
+            let checkboxesCount = 0;
 
             for (let i = 0; i < checkboxes.length; i++) {
                 if (checkboxes[i].checked) {
-                    brojCheckova = brojCheckova + 1;
+                    checkboxesCount = checkboxesCount + 1;
                     lastChecked = e.target
                 }
             }
-
             //PROVJERA KOLIKO JE MOGUĆIH ODGOVORA
 
-            if (brojCheckova > 0) {
+            if (checkboxesCount > 0) {
                 document.getElementById(`question-${slide}`).style.background = "green"
-                if (brojCheckova > slide + 2) {
+                if (checkboxesCount > slide + 2) {
                     alertBox.style.display = "flex";
                     setTimeout(() => alertBox.style.display = "none", 3000)
                     for (let x = 0; x < checkboxes.length; x++) {
@@ -141,8 +140,6 @@ const tester = (slide) => {
                 document.getElementById(`question-${slide}`).style.background = "#3a3a3a"
             }
 
-
-            //PROVJERA DA LI JE BAREM JEDAN ODGOVOR ODABRAN NA SVAKOM SLAJDU POMOĆU BACKGROUND-A
 
             let allGroupsChecked = true;
 
@@ -171,11 +168,11 @@ const tester = (slide) => {
 }
 
 const prosliSlide = () => {
-    prikaziSlide(currentSlide - 1)
+    prikaziSlide(config.currentSlide - 1)
 }
 
 const sljedeciSlide = () => {
-    prikaziSlide(currentSlide + 1)
+    prikaziSlide(config.currentSlide + 1)
 }
 
 const prikaziOdgovore = () => {
@@ -184,40 +181,34 @@ const prikaziOdgovore = () => {
 
     slideDiv.forEach((group) => {
         const checkboxes = group.querySelectorAll('input[type="checkbox"]');
+        config.odgovori[group.dataset.question] = []
 
         checkboxes.forEach((checkbox) => {
 
             if (checkbox.checked) {
-                odgovori[group.dataset.question] += checkbox.value;
+                config.odgovori[group.dataset.question].push(checkbox.value);
             }
         });
         resultsDiv.style.display = "flex";
-
-        resultsDiv.innerHTML = ` 
-            <h2>Results<h2>
-            Question 1: ${Object.values(odgovori["Question 1"]).join(",")} <br/>
-            Question 2: ${Object.values(odgovori["Question 2"]).join(",")}<br/>
-            Question 3: ${Object.values(odgovori["Question 3"]).join(",")}<br/>
-            Question 4: ${Object.values(odgovori["Question 4"]).join(",")}<br/>
-        `
-
     });
 
-
-
+    Object.entries(config.odgovori).forEach(entry => {
+        const [key, value] = entry;
+        console.log(key, value);
+        resultsDiv.innerHTML += `${key}: ${value.join(",")} <br/>`
+    });
 }
 
 const generirajQuiz = () => {
-    pitanja.forEach(el => {
-        kreirajSlide(el)
+    for (let i = 0; i < (config.brojPitanja); i++) {
+        kreirajSlide(i + 1)
     }
-    )
 
     prikaziSlide(0);
-    tester(1)
-    tester(2)
-    tester(3)
-    tester(4)
+
+    for (let i = 0; i < (config.brojPitanja); i++) {
+        tester(i + 1)
+    }
 }
 
 generirajQuiz();
